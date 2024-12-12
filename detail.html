@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Pegawai</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <style>
+    th {
+      font-weight: bold;
+      text-align: left;
+      width: 40%;
+    }
+    td {
+      text-align: left;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center">Detail Pegawai</h2>
+    <table class="table table-bordered">
+      <tbody id="pegawai-detail">
+        <!-- Data pegawai akan dimuat di sini -->
+      </tbody>
+    </table>
+    <div class="section-title">Dokumen</div>
+    <table class="table table-bordered">
+      <tbody id="dokumen-detail">
+        <!-- Data dokumen akan dimuat di sini -->
+      </tbody>
+    </table>
+    <div class="text-center" style="margin-bottom: 100px;">
+        <!-- Tombol Edit Data -->
+        <a id="edit-button" href="#" class="btn btn-warning">
+          <i class="bi bi-pencil-fill"></i> Edit Data
+        </a>
+      </div>
+  </div>
+
+  <script>
+    function formatDate(isoDate) {
+        if (!isoDate) return "Tidak ada"; // Jika data kosong, tampilkan "Tidak ada"
+        const date = new Date(isoDate);
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        return date.toLocaleDateString("id-ID", options); // Format sesuai lokal Indonesia
+    }
+
+    // Ambil parameter NIP dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nip = urlParams.get('id');
+
+    // URL API Google Apps Script
+    const scriptURL = `https://script.google.com/macros/s/AKfycbzZc_wtXGC0A8vIeqqA1BVb_0gMaCplZRZPSv4FLSiADVEw3ZyldYLL1UH2ZpzO7cvj/exec?id=${nip}`;
+
+    fetch(scriptURL
+    )
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById("pegawai-detail").innerHTML = "<tr><td colspan='2'>Data tidak ditemukan.</td></tr>";
+        } else {
+          // Bagian Data Pegawai
+          const detailTable = document.getElementById("pegawai-detail");
+          const pegawaiData = [
+            { title: "Nama", value: data.Nama || "Tidak ada" },
+            { title: "NIP", value: data.NIP || "Tidak ada" },
+            { title: "Tempat dan Tanggal Lahir", value: data["Tempat dan Tanggal Lahir"] || "Tidak ada" },
+            { title: "Golongan", value: data["Pangkat / Gol Ruang"] || "Tidak ada" },
+            { title: "Unit Kerja", value: data["Unit Kerja"] || "Tidak ada" },
+          ];
+          pegawaiData.forEach(item => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<th>${item.title}</th><td>${item.value}</td>`;
+            detailTable.appendChild(row);
+          });
+
+          // Bagian Dokumen
+          const dokumenTable = document.getElementById("dokumen-detail");
+          const dokumenData = [
+            { title: "KTP", value: data.KTP === true ? "Ada" : "Tidak ada" },
+            { title: "KK", value: data.KK === true ? "Ada" : "Tidak ada" },
+            { title: "SK CPNS", value: data["SK CPNS"] === true ? "Ada" : "Tidak ada" },
+            { title: "SK PNS", value: data["SK PNS"] === true ? "Ada" : "Tidak ada" },
+            { title: "SK Kenaikan Pangkat", value: data["SK Kenaikan Pangkat"] === true ? "Ada" : "Tidak ada" },
+            { title: "Tanggal SK Kenaikan Pangkat", value: formatDate(data["Tanggal SK Kenaikan Pangkat"]) || "Tidak ada" },
+            { title: "SK Jabatan", value: data["SK Jabatan"] === true ? "Ada" : "Tidak ada" },
+            { title: "STPPL (Diklat Struktural)", value: data["STPPL (Diklat Struktural)"] === true ? "Ada" : "Tidak ada" },
+            { title: "STPPL (Diklat Teknis/ Fungsional)", value: data["STPPL (Diklat Teknis/ Fungsional)"] === true ? "Ada" : "Tidak ada" },
+            { title: "Ijazah Pendidikan Terakhir", value: data["Ijazah Pendidikan Terakhir"] === true ? "Ada" : "Tidak ada" },
+            { title: "Karis/ Karsu", value: data["Karis/ Karsu"] === true ? "Ada" : "Tidak ada" },
+            { title: "Kartu Taspen", value: data["Kartu Taspen"] === true ? "Ada" : "Tidak ada" },
+            { title: "SK Konversi NIP", value: data["SK Konversi NIP"] === true ? "Ada" : "Tidak ada" },
+            { title: "Kenaikan Gaji Berkala", value: data["Kenaikan Gaji Berkala"] === true ? "Ada" : "Tidak ada" },
+            { title: "Tanggal Kenaikan Gaji Berkala", value: formatDate(data["Tanggal Kenaikan Gaji Berkala"]) || "Tidak ada" },
+            { title: "KPE dan Karpeg", value: data["KPE dan Karpeg"] === true ? "Ada" : "Tidak ada" },
+            { title: "SK Mutasi", value: data["SK Mutasi (jika ada)"] === true ? "Ada" : "Tidak ada" },
+            { title: "Satya Lencana", value: data["Satya Lencana"] === true ? "Ada" : "Tidak ada" },
+            { title: "Akta Nikah", value: data["Akta Nikah"] === true ? "Ada" : "Tidak ada" },
+            { title: "NPWP", value: data["NPWP"] === true ? "Ada" : "Tidak ada" },
+          ];
+          dokumenData.forEach(item => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<th>${item.title}</th><td>${item.value}</td>`;
+            dokumenTable.appendChild(row);
+          });
+
+          // Atur tombol "Edit Data" untuk mengarahkan ke edit.html dengan parameter NIP
+          const editButton = document.getElementById("edit-button");
+          editButton.href = `edit.html?id=${data.NIP}`;
+        }
+      })
+      .catch(err => console.error("Error:", err));
+  </script>
+</body>
+</html>
