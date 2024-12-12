@@ -380,6 +380,9 @@
                 {
                   method: "POST",
                   body: JSON.stringify(updatedData),
+                  headers: {
+                    "Content-Type": "application/json", // Header penting untuk JSON
+                  },
                 }
               )
                 .then((response) => response.json())
